@@ -1,0 +1,17 @@
+# Configuración local de Copilot
+.github/copilot-instructions.md
+
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
