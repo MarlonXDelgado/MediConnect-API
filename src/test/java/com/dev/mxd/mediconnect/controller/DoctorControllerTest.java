@@ -15,6 +15,9 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,11 +46,66 @@ class DoctorControllerTest {
 
     @Test
     void shouldRejectInvalidDoctorRequest() throws Exception {
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                        .post("/api/doctors")
+        mockMvc.perform(post("/api/doctors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"));
     }
+
+        @Test
+        void shouldGetDoctorById() throws Exception {
+        when(doctorService.findById(1L)).thenReturn(
+            new DoctorResponse(1L, "Ana", "Pérez", "Cardiología", "123",
+                "ana@example.com", "3001234567", true));
+
+        mockMvc.perform(get("/api/doctors/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1));
+        }
+
+        @Test
+        void shouldCreateDoctor() throws Exception {
+        when(doctorService.create(org.mockito.ArgumentMatchers.any())).thenReturn(
+            new DoctorResponse(1L, "Ana", "Pérez", "Cardiología", "123",
+                "ana@example.com", "3001234567", true));
+
+        mockMvc.perform(post("/api/doctors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validDoctorJson()))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(1));
+        }
+
+        @Test
+        void shouldUpdateDoctor() throws Exception {
+        when(doctorService.update(org.mockito.ArgumentMatchers.eq(1L), org.mockito.ArgumentMatchers.any()))
+            .thenReturn(new DoctorResponse(1L, "Ana", "Pérez", "Cardiología", "123",
+                "ana@example.com", "3001234567", true));
+
+        mockMvc.perform(put("/api/doctors/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validDoctorJson()))
+            .andExpect(status().isOk());
+        }
+
+        @Test
+        void shouldDeleteDoctor() throws Exception {
+        mockMvc.perform(delete("/api/doctors/1"))
+            .andExpect(status().isNoContent());
+        }
+
+        private String validDoctorJson() {
+        return """
+            {
+              "nombre": "Ana",
+              "apellido": "Pérez",
+              "especialidad": "Cardiología",
+              "tarjeta_profesional": "123",
+              "correo": "ana@example.com",
+              "telefono": "3001234567",
+              "disponible": true
+            }
+            """;
+        }
 }
