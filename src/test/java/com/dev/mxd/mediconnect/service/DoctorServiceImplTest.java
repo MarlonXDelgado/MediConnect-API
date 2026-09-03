@@ -9,6 +9,7 @@ import com.dev.mxd.mediconnect.repository.DoctorRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -52,6 +53,35 @@ class DoctorServiceImplTest {
 
         assertThatThrownBy(() -> service.findById(99L))
                 .isInstanceOf(DoctorNotFoundException.class);
+    }
+
+    @Test
+    void shouldListDoctors() {
+        when(repository.findAll()).thenReturn(List.of(doctor(1L, "123")));
+
+        assertThat(service.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldUpdateDoctor() {
+        Doctor existingDoctor = doctor(1L, "123");
+        when(repository.findById(1L)).thenReturn(Optional.of(existingDoctor));
+        when(repository.findByTarjetaProfesional("456")).thenReturn(Optional.empty());
+        when(repository.save(existingDoctor)).thenReturn(existingDoctor);
+
+        DoctorResponse response = service.update(1L, request("456"));
+
+        assertThat(response.tarjetaProfesional()).isEqualTo("456");
+        verify(repository).save(existingDoctor);
+    }
+
+    @Test
+    void shouldDeleteDoctor() {
+        when(repository.findById(1L)).thenReturn(Optional.of(doctor(1L, "123")));
+
+        service.delete(1L);
+
+        verify(repository).deleteById(1L);
     }
 
     private DoctorRequest request(String tarjetaProfesional) {
