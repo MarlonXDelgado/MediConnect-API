@@ -51,6 +51,33 @@ class InMemoryAppointmentRepositoryTest {
         assertThat(repository.findAll()).isEmpty();
     }
 
+    @Test
+    void shouldReturnFalseWhenNoAppointmentMatchesDoctorAndTime() {
+        repository.save(appointment(AppointmentStatus.SCHEDULED));
+
+        assertThat(repository.existsByDoctorIdAndFechaHoraAndActiva(
+                2L, appointmentTime.plusHours(1))).isFalse();
+    }
+
+    @Test
+    void shouldReturnFalseWhenDoctorMatchesButTimeDoesNot() {
+        repository.save(appointment(AppointmentStatus.SCHEDULED));
+
+        assertThat(repository.existsByDoctorIdAndFechaHoraAndActiva(
+                1L, appointmentTime.plusHours(1))).isFalse();
+    }
+
+    @Test
+    void shouldUpdateAppointmentWithExistingId() {
+        Appointment appointment = repository.save(appointment(AppointmentStatus.SCHEDULED));
+        appointment.setEstado(AppointmentStatus.COMPLETED);
+
+        repository.save(appointment);
+
+        assertThat(repository.findById(appointment.getId()).orElseThrow().getEstado())
+                .isEqualTo(AppointmentStatus.COMPLETED);
+    }
+
     private Appointment appointment(AppointmentStatus status) {
         return new Appointment(null, 1L, "Ana Pérez", "ana@example.com",
                 "Consulta general", appointmentTime, status);
