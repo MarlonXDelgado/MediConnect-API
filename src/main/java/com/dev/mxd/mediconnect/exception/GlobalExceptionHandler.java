@@ -16,6 +16,11 @@ public class GlobalExceptionHandler {
         return problemDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    public ProblemDetail handleAppointmentNotFound(AppointmentNotFoundException exception) {
+        return problemDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
     @ExceptionHandler(DuplicateProfessionalLicenseException.class)
     public ProblemDetail handleDuplicateProfessionalLicense(DuplicateProfessionalLicenseException exception) {
         return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
