@@ -1,7 +1,9 @@
 package com.dev.mxd.mediconnect.controller;
 
 import com.dev.mxd.mediconnect.dto.AppointmentResponse;
+import com.dev.mxd.mediconnect.exception.AppointmentNotFoundException;
 import com.dev.mxd.mediconnect.exception.GlobalExceptionHandler;
+import com.dev.mxd.mediconnect.exception.ScheduleConflictException;
 import com.dev.mxd.mediconnect.service.AppointmentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +93,27 @@ class AppointmentControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Bad Request"));
     }
+
+            @Test
+            void shouldReturnNotFoundWhenAppointmentDoesNotExist() throws Exception {
+            when(appointmentService.findById(99L)).thenThrow(new AppointmentNotFoundException(99L));
+
+            mockMvc.perform(get("/api/appointments/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Not Found"));
+            }
+
+            @Test
+            void shouldReturnConflictWhenScheduleIsUnavailable() throws Exception {
+            when(appointmentService.create(any()))
+                .thenThrow(new ScheduleConflictException(1L, LocalDateTime.of(2030, 1, 15, 10, 0)));
+
+            mockMvc.perform(post("/api/appointments")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(validAppointmentJson()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflict"));
+            }
 
     private AppointmentResponse appointmentResponse() {
         return new AppointmentResponse(1L, 1L, "Ana Pérez", "ana@example.com",
