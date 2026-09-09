@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -81,6 +82,39 @@ class AppointmentServiceImplTest {
         when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.findById(99L))
+                .isInstanceOf(AppointmentNotFoundException.class);
+    }
+
+    @Test
+    void shouldListAllAppointments() {
+        when(appointmentRepository.findAll())
+                .thenReturn(List.of(appointment(1L, AppointmentStatus.SCHEDULED)));
+
+        assertThat(service.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldListAppointmentsByDoctor() {
+        when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor()));
+        when(appointmentRepository.findByDoctorId(1L))
+                .thenReturn(List.of(appointment(1L, AppointmentStatus.SCHEDULED)));
+
+        assertThat(service.findByDoctorId(1L)).hasSize(1);
+    }
+
+    @Test
+    void shouldRejectAppointmentsByUnknownDoctor() {
+        when(doctorRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findByDoctorId(99L))
+                .isInstanceOf(DoctorNotFoundException.class);
+    }
+
+    @Test
+    void shouldRejectCancelWhenAppointmentDoesNotExist() {
+        when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cancel(99L))
                 .isInstanceOf(AppointmentNotFoundException.class);
     }
 
