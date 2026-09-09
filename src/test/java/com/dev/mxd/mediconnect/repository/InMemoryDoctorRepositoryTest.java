@@ -33,6 +33,17 @@ class InMemoryDoctorRepositoryTest {
         assertThat(repository.findAll()).isEmpty();
     }
 
+    @Test
+    void shouldUpdateDoctorWithExistingId() {
+        Doctor doctor = repository.save(doctor("123"));
+        doctor.setEspecialidad("Neurología");
+
+        repository.save(doctor);
+
+        assertThat(repository.findById(doctor.getId()).orElseThrow().getEspecialidad())
+                .isEqualTo("Neurología");
+    }
+
     private Doctor doctor(String tarjetaProfesional) {
         return new Doctor(null, "Ana", "Pérez", "Cardiología", tarjetaProfesional,
                 "ana@example.com", "3001234567", true);
