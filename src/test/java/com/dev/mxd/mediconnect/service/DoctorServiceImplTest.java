@@ -84,6 +84,45 @@ class DoctorServiceImplTest {
         verify(repository).deleteById(1L);
     }
 
+    @Test
+    void shouldRejectUpdateWhenDoctorDoesNotExist() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(99L, request("123")))
+                .isInstanceOf(DoctorNotFoundException.class);
+    }
+
+    @Test
+    void shouldRejectUpdateWithAnotherDoctorProfessionalLicense() {
+        Doctor existingDoctor = doctor(1L, "123");
+        when(repository.findById(1L)).thenReturn(Optional.of(existingDoctor));
+        when(repository.findByTarjetaProfesional("456"))
+                .thenReturn(Optional.of(doctor(2L, "456")));
+
+        assertThatThrownBy(() -> service.update(1L, request("456")))
+                .isInstanceOf(DuplicateProfessionalLicenseException.class);
+    }
+
+    @Test
+    void shouldAllowKeepingOwnProfessionalLicense() {
+        Doctor existingDoctor = doctor(1L, "123");
+        when(repository.findById(1L)).thenReturn(Optional.of(existingDoctor));
+        when(repository.findByTarjetaProfesional("123")).thenReturn(Optional.of(existingDoctor));
+        when(repository.save(existingDoctor)).thenReturn(existingDoctor);
+
+        DoctorResponse response = service.update(1L, request("123"));
+
+        assertThat(response.tarjetaProfesional()).isEqualTo("123");
+    }
+
+    @Test
+    void shouldRejectDeleteWhenDoctorDoesNotExist() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.delete(99L))
+                .isInstanceOf(DoctorNotFoundException.class);
+    }
+
     private DoctorRequest request(String tarjetaProfesional) {
         return new DoctorRequest("Ana", "Pérez", "Cardiología", tarjetaProfesional,
                 "ana@example.com", "3001234567", true);
