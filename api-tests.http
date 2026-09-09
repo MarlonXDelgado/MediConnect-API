@@ -1,0 +1,62 @@
+@baseUrl = http://localhost:8080
+
+### Crear doctor
+POST {{baseUrl}}/api/doctors
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "especialidad": "Cardiología",
+  "tarjeta_profesional": "DOC-001",
+  "correo": "ana.perez@example.com",
+  "telefono": "3001234567",
+  "disponible": true
+}
+
+### Listar doctores
+GET {{baseUrl}}/api/doctors
+
+### Consultar doctor por ID
+GET {{baseUrl}}/api/doctors/1
+
+### Actualizar doctor
+PUT {{baseUrl}}/api/doctors/1
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Pérez",
+  "especialidad": "Neurología",
+  "tarjeta_profesional": "DOC-001",
+  "correo": "ana.perez@example.com",
+  "telefono": "3001234567",
+  "disponible": true
+}
+
+### Crear cita
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "doctor_id": 1,
+  "paciente_nombre": "Carlos Gómez",
+  "paciente_correo": "carlos.gomez@example.com",
+  "motivo": "Consulta general",
+  "fecha_hora": "2030-01-15T10:00:00"
+}
+
+### Listar citas
+GET {{baseUrl}}/api/appointments
+
+### Consultar cita por ID
+GET {{baseUrl}}/api/appointments/1
+
+### Listar citas de un doctor
+GET {{baseUrl}}/api/appointments/doctor/1
+
+### Cancelar cita
+PUT {{baseUrl}}/api/appointments/1/cancel
+
+### Eliminar doctor
+DELETE {{baseUrl}}/api/doctors/1
