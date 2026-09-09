@@ -21,6 +21,11 @@ public class GlobalExceptionHandler {
         return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 
+    @ExceptionHandler(ScheduleConflictException.class)
+    public ProblemDetail handleScheduleConflict(ScheduleConflictException exception) {
+        return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
         String detail = exception.getBindingResult().getFieldErrors().stream()
